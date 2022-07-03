@@ -51,8 +51,8 @@ IMPORTANT: The master branch is used in source just as an example. In your code,
 
 ```hcl
 module "github-oidc" {
-  source  = "terraform-module/blueprint"
-  version = "0.0.0"
+  source  = "terraform-module/github-oidc-provider/aws"
+  version = "~> 1"
 
   create_oidc_provider = true
   create_oidc_role     = true

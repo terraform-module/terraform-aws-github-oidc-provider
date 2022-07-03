@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "this" {
       condition {
         test = "StringLike"
         values = [
-          for repo in var.github_repositories :
+          for repo in var.repositories :
           "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"
         ]
         variable = "token.actions.githubusercontent.com:sub"

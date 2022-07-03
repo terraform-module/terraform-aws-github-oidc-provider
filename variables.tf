@@ -20,7 +20,7 @@ variable "github_thumbprint" {
   default     = "6938fd4d98bab03faadb97b34396831e3780aea1"
 }
 
-variable "github_repositories" {
+variable "repositories" {
   description = "List of GitHub organization/repository names authorized to assume the role."
   type        = list(string)
   default     = []
@@ -29,9 +29,9 @@ variable "github_repositories" {
     # Ensures each element of github_repositories list matches the
     # organization/repository format used by GitHub.
     condition = length([
-      for repo in var.github_repositories : 1
+      for repo in var.repositories : 1
       if length(regexall("^[A-Za-z0-9_.-]+?/([A-Za-z0-9_.:/-]+|\\*)$", repo)) > 0
-    ]) == length(var.github_repositories)
+    ]) == length(var.repositories)
     error_message = "Repositories must be specified in the organization/repository format."
   }
 }

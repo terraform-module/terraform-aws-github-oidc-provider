@@ -7,7 +7,7 @@ module "github-oidc" {
   create_oidc_provider = true
   create_oidc_role     = true
 
-  github_repositories       = ["terraform-module/terraform-aws-github-oidc-provider:ref:refs/heads/main"]
+  repositories              = ["terraform-module/terraform-aws-github-oidc-provider:ref:refs/heads/main"]
   oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
 }
 ################################################################################

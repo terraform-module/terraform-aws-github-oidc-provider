@@ -59,7 +59,7 @@ module "github-oidc" {
   create_oidc_provider = true
   create_oidc_role     = true
 
-  github_repositories       = ["terraform-module/module-blueprint"]
+  repositories              = ["terraform-module/module-blueprint"]
   oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
 }
 ```

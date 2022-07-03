@@ -23,7 +23,7 @@ resource "aws_iam_role" "this" {
   tags                 = var.tags
   # path                  = var.iam_role_path
   # permissions_boundary  = var.iam_role_permissions_boundary
-  depends_on = [ aws_iam_openid_connect_provider.this ]
+  depends_on = [aws_iam_openid_connect_provider.this]
 }
 
 resource "aws_iam_role_policy_attachment" "attach" {
@@ -32,7 +32,7 @@ resource "aws_iam_role_policy_attachment" "attach" {
   policy_arn = var.oidc_role_attach_policies[count.index]
   role       = aws_iam_role.this[0].id
 
-  depends_on = [ aws_iam_role.this ]
+  depends_on = [aws_iam_role.this]
 }
 
 data "aws_iam_policy_document" "this" {
@@ -54,7 +54,7 @@ data "aws_iam_policy_document" "this" {
       }
 
       principals {
-        identifiers = [ statement.value.arn ]
+        identifiers = [statement.value.arn]
         type        = "Federated"
       }
     }

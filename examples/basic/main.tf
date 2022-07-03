@@ -2,7 +2,7 @@
 # Resources
 ################################################################################
 module "github-oidc" {
-  source  = "../.."
+  source = "../.."
 
   create_oidc_provider = true
   create_oidc_role     = true

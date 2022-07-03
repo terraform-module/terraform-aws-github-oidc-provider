@@ -10,10 +10,10 @@ variable "create_oidc_role" {
   default     = true
 }
 
-// Refer to the README for information on obtaining the thumbprint.
-// This is specified as a variable to allow it to be updated quickly if it is
-// unexpectedly changed by GitHub.
-// See: https://github.blog/changelog/2022-01-13-github-actions-update-on-oidc-based-deployments-to-aws/
+# Refer to the README for information on obtaining the thumbprint.
+# This is specified as a variable to allow it to be updated quickly if it is
+# unexpectedly changed by GitHub.
+# See: https://github.blog/changelog/2022-01-13-github-actions-update-on-oidc-based-deployments-to-aws/
 variable "github_thumbprint" {
   description = "GitHub OpenID TLS certificate thumbprint."
   type        = string
@@ -26,8 +26,8 @@ variable "github_repositories" {
   default     = []
 
   validation {
-    // Ensures each element of github_repositories list matches the
-    // organization/repository format used by GitHub.
+    # Ensures each element of github_repositories list matches the
+    # organization/repository format used by GitHub.
     condition = length([
       for repo in var.github_repositories : 1
       if length(regexall("^[A-Za-z0-9_.-]+?/([A-Za-z0-9_.:/-]+|\\*)$", repo)) > 0

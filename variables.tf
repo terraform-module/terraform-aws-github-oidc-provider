@@ -62,7 +62,7 @@ variable "tags" {
 variable "role_name" {
   description = "(Optional, Forces new resource) Friendly name of the role."
   type        = string
-  default     = "oidc-provider-aws-github-action"
+  default     = "github-oidc-provider-aws"
 }
 
 variable "role_description" {

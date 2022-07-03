@@ -3,3 +3,24 @@ name: oidc.example
 
 on:
   workflow_dispatch:
+
+jobs:
+  caller-identity:
+    name: check caller identity
+    # These permissions are needed to interact with GitHub's OIDC Token endpoint.
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: ${{ secrets.AWS_REGION }}
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} # github_oidc_role
+
+    - run: aws sts get-caller-identity
+
+    - run: aws s3 ls

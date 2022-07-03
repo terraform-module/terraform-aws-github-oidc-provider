@@ -1,6 +1,8 @@
 # AWS Github OIDC Provider Terraform Module
 
-This module allows you to create a GitHub OIDC provider and the associated IAM roles, that will help Github Actions to securely authenticate against the AWS API using an IAM role
+This module allows you to create a GitHub OIDC provider and the associated IAM roles, that will help Github Actions to securely authenticate against the AWS API using an IAM role.
+
+We recommend using GitHub's OIDC provider to get short-lived credentials needed for your actions. Specifying role-to-assume without providing an aws-access-key-id or a web-identity-token-file will signal to the action that you wish to use the OIDC provider. The default session duration is 1 hour when using the OIDC provider to directly assume an IAM Role. The default session duration is 6 hours when using an IAM User to assume an IAM Role (by providing an aws-access-key-id, aws-secret-access-key, and a role-to-assume) . If you would like to adjust this you can pass a duration to role-duration-seconds, but the duration cannot exceed the maximum that was defined when the IAM Role was created. The default session name is GitHubActions, and you can modify it by specifying the desired name in role-session-name.
 
 ## Features
 

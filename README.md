@@ -59,7 +59,7 @@ module "github-oidc" {
   create_oidc_provider = true
   create_oidc_role     = true
 
-  github_repositories       = var.github_repositories
+  github_repositories       = ["terraform-module/module-blueprint"]
   oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
 }
 ```
@@ -154,9 +154,6 @@ Currently maintained by [Ivan Katliarchuk](https://github.com/ivankatliarchuk) a
 ## Terraform Registry
 
 - [Module](https://registry.terraform.io/modules/terraform-module/todo/aws)
-
-## Resources
-
 - [Terraform modules](https://registry.terraform.io/namespaces/terraform-module)
 
 ## Resources

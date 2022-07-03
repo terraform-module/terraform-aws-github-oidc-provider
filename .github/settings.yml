@@ -3,10 +3,10 @@ _extends: .github
 
 repository:
   # See https://developer.github.com/v3/repos/#edit for all available settings.
-  name: terraform-module-blueprint
-  description: "ℹ️ Terraform module blueprint."
+  name: terraform-aws-github-oidc-provider
+  description: "ℹ️ Terraform GitHub OIDC module."
   homepage: https://ivankatliarchuk.github.io
-  topics: ivank, terraform, terraform-module
+  topics: ivank, terraform, terraform-module, github, oidc
   private: false
   has_issues: true
   has_projects: false

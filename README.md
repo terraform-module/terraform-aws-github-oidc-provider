@@ -155,8 +155,7 @@ Currently maintained by [Ivan Katliarchuk](https://github.com/ivankatliarchuk) a
 
 ## Terraform Registry
 
-- [Module](https://registry.terraform.io/modules/terraform-module/todo/aws)
-- [Terraform modules](https://registry.terraform.io/namespaces/terraform-module)
+- [Module](https://registry.terraform.io/modules/terraform-module/github-oidc-provider/aws/latest)
 
 ## Resources
 

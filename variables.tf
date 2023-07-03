@@ -10,14 +10,18 @@ variable "create_oidc_role" {
   default     = true
 }
 
-# Refer to the README for information on obtaining the thumbprint.
+# Refer to the README for information on obtaining the thumbprints.
 # This is specified as a variable to allow it to be updated quickly if it is
 # unexpectedly changed by GitHub.
 # See: https://github.blog/changelog/2022-01-13-github-actions-update-on-oidc-based-deployments-to-aws/
-variable "github_thumbprint" {
-  description = "GitHub OpenID TLS certificate thumbprint."
-  type        = string
-  default     = "6938fd4d98bab03faadb97b34396831e3780aea1"
+#      https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/
+variable "github_thumbprints" {
+  description = "GitHub OpenID TLS certificate thumbprints."
+  type        = list(string)
+  default = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1",
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd"
+  ]
 }
 
 variable "repositories" {

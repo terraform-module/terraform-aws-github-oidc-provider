@@ -10,7 +10,7 @@ resource "aws_iam_openid_connect_provider" "this" {
   client_id_list = [
     "sts.amazonaws.com",
   ]
-  thumbprint_list = [var.github_thumbprint]
+  thumbprint_list = var.github_thumbprints
   url             = "https://token.actions.githubusercontent.com"
 }
 

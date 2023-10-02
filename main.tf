@@ -10,7 +10,7 @@ resource "aws_iam_openid_connect_provider" "this" {
   client_id_list = [
     "sts.amazonaws.com",
   ]
-  thumbprint_list = [var.github_thumbprint]
+  thumbprint_list = var.github_thumbprints
   url             = "https://token.actions.githubusercontent.com"
 }
 
@@ -19,7 +19,7 @@ resource "aws_iam_role" "this" {
   name                 = var.role_name
   description          = var.role_description
   max_session_duration = var.max_session_duration
-  assume_role_policy   = join("", data.aws_iam_policy_document.this.*.json)
+  assume_role_policy   = join("", data.aws_iam_policy_document.this[count.index].json)
   tags                 = var.tags
   # path                  = var.iam_role_path
   # permissions_boundary  = var.iam_role_permissions_boundary
@@ -30,7 +30,7 @@ resource "aws_iam_role_policy_attachment" "attach" {
   count = var.create_oidc_role ? length(var.oidc_role_attach_policies) : 0
 
   policy_arn = var.oidc_role_attach_policies[count.index]
-  role       = join("", aws_iam_role.this.*.name)
+  role       = join("", aws_iam_role.this[count.index].name)
 
   depends_on = [aws_iam_role.this]
 }

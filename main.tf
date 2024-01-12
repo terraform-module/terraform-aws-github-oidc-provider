@@ -15,11 +15,11 @@ resource "aws_iam_openid_connect_provider" "this" {
 }
 
 resource "aws_iam_role" "this" {
-  count                = var.create_oidc_provider && var.create_oidc_role ? 1 : 0
+  count                = var.create_oidc_role ? 1 : 0
   name                 = var.role_name
   description          = var.role_description
   max_session_duration = var.max_session_duration
-  assume_role_policy   = join("", data.aws_iam_policy_document.this.*.json)
+  assume_role_policy   = join("", data.aws_iam_policy_document.this[0].*.json)
   tags                 = var.tags
   # path                  = var.iam_role_path
   # permissions_boundary  = var.iam_role_permissions_boundary
@@ -36,27 +36,24 @@ resource "aws_iam_role_policy_attachment" "attach" {
 }
 
 data "aws_iam_policy_document" "this" {
+  count = var.create_oidc_role ? 1 : 0
 
-  dynamic "statement" {
-    for_each = aws_iam_openid_connect_provider.this
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
 
-    content {
-      actions = ["sts:AssumeRoleWithWebIdentity"]
-      effect  = "Allow"
+    condition {
+      test   = "StringLike"
+      values = [
+        for repo in var.repositories :
+        "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"
+      ]
+      variable = "token.actions.githubusercontent.com:sub"
+    }
 
-      condition {
-        test = "StringLike"
-        values = [
-          for repo in var.repositories :
-          "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"
-        ]
-        variable = "token.actions.githubusercontent.com:sub"
-      }
-
-      principals {
-        identifiers = [statement.value.arn]
-        type        = "Federated"
-      }
+    principals {
+      identifiers = [try(aws_iam_openid_connect_provider.this[0].arn, var.oidc_provider_arn)]
+      type        = "Federated"
     }
   }
 }

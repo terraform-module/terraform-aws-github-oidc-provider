@@ -4,6 +4,12 @@ variable "create_oidc_provider" {
   default     = true
 }
 
+variable "oidc_provider_arn" {
+  description = "ARN of the OIDC provider to use. Required if 'create_oidc_provider' is false"
+  type        = string
+  default     = null
+}
+
 variable "create_oidc_role" {
   description = "Whether or not to create the OIDC attached role"
   type        = bool

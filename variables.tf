@@ -42,6 +42,15 @@ variable "repositories" {
   }
 }
 
+# GitHub's OIDC subject claim can be customized, so there is no need to restrict the subject claim to a specific format.
+# The repositories variable is kept for backward compatibility and to simplify the description.
+# See: https://docs.github.com/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect#customizing-the-subject-claims-for-an-organization-or-repository
+variable "authorized_subjects" {
+  description = "List of GitHub OIDC subject identifiers authorized to assume the role."
+  type        = list(string)
+  default     = []
+}
+
 variable "max_session_duration" {
   description = "Maximum session duration in seconds."
   type        = number

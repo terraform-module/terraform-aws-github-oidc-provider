@@ -10,7 +10,7 @@ resource "aws_iam_openid_connect_provider" "this" {
   client_id_list = [
     "sts.amazonaws.com",
   ]
-  thumbprint_list = [var.github_thumbprint]
+  thumbprint_list = var.github_thumbprints
   url             = "https://token.actions.githubusercontent.com"
 }
 
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "this" {
     effect  = "Allow"
 
     condition {
-      test   = "StringLike"
+      test = "StringLike"
       values = [
         for repo in var.repositories :
         "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"

@@ -43,11 +43,14 @@ data "aws_iam_policy_document" "this" {
     effect  = "Allow"
 
     condition {
-      test   = "StringLike"
-      values = [
-        for repo in var.repositories :
-        "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"
-      ]
+      test = "StringLike"
+      values = concat(
+        [
+          for repo in var.repositories :
+          "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"
+        ],
+        var.authorized_subjects,
+      )
       variable = "token.actions.githubusercontent.com:sub"
     }
 

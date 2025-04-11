@@ -76,3 +76,10 @@ variable "role_description" {
   type        = string
   default     = "Role assumed by the GitHub OIDC provider."
 }
+
+variable "audiences" {
+  description = "(Optional) List of audiences that will be in the JWT the OIDC provider generates"
+  type = list(string)
+  default = ["sts.amazonaws.com"]
+}
+

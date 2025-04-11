@@ -7,9 +7,7 @@
 */
 resource "aws_iam_openid_connect_provider" "this" {
   count = var.create_oidc_provider ? 1 : 0
-  client_id_list = [
-    "sts.amazonaws.com",
-  ]
+  client_id_list  = var.audiences
   thumbprint_list = [var.github_thumbprint]
   url             = "https://token.actions.githubusercontent.com"
 }
@@ -49,6 +47,15 @@ data "aws_iam_policy_document" "this" {
         "repo:%{if length(regexall(":+", repo)) > 0}${repo}%{else}${repo}:*%{endif}"
       ]
       variable = "token.actions.githubusercontent.com:sub"
+    }
+
+    condition {
+      test = "StringEquals"
+      values = [
+        for audience in var.audiences :
+        "${audience}"
+      ]
+      variable = "token.actions.githubusercontent.com:aud"
     }
 
     principals {

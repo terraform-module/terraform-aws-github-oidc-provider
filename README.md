@@ -9,12 +9,12 @@ We recommend using GitHub's OIDC provider to get short-lived credentials needed 
 ## Features
 
 1. Create an AWS OIDC provider for GitHub Actions
-1. Create one or more IAM role that can be assumed by GitHub Actions
-1. IAM roles can be scoped to :
+2. Create one or more IAM role that can be assumed by GitHub Actions
+3. IAM roles can be scoped to :
      * One or more GitHub organisations
      * One or more GitHub repository
      * One or more branches in a repository
-1. Use existing OIDC provider and roles with Terraform
+4. Use existing OIDC provider and roles with Terraform
      * Reference an existing OIDC provider by ARN
      * Reference an existing IAM role by ARN
      * Optionally attach policies to existing roles

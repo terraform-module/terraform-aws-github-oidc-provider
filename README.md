@@ -14,6 +14,11 @@ We recommend using GitHub's OIDC provider to get short-lived credentials needed 
      * One or more GitHub organisations
      * One or more GitHub repository
      * One or more branches in a repository
+1. Use existing OIDC provider and roles with Terraform
+     * Reference an existing OIDC provider by ARN
+     * Reference an existing IAM role by ARN
+     * Optionally attach policies to existing roles
+     * Update repository access list for existing roles
 
 
 | Feature                                                                                                | Status |
@@ -23,6 +28,9 @@ We recommend using GitHub's OIDC provider to get short-lived credentials needed 
 | Create a role specific to a branch in a repository                                                      | ✅     |
 | Create a role for multiple organisations/repositories/branches                                         | ✅     |
 | Create a role for organisations/repositories/branches selected by wildcard (e.g. `feature/*` branches) | ✅     |
+| Use an existing OIDC provider                                                                          | ✅     |
+| Use an existing IAM role                                                                               | ✅     |
+| Update repository access list for existing roles                                                       | ✅     |
 
 ---
 
@@ -63,6 +71,73 @@ module "github-oidc" {
 
   repositories              = ["terraform-module/module-blueprint"]
   oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
+}
+```
+
+### Using a custom role path and permissions boundary
+
+```hcl
+module "github-oidc" {
+  source  = "terraform-module/github-oidc-provider/aws"
+  version = "~> 1"
+
+  create_oidc_provider = true
+  create_oidc_role     = true
+
+  # Set a custom path for the role (useful for organizing roles)
+  iam_role_path = "/github-actions/"
+  
+  # Set a permissions boundary to limit maximum permissions
+  iam_role_permissions_boundary = "arn:aws:iam::123456789012:policy/MyPermissionsBoundary"
+  
+  repositories              = ["terraform-module/module-blueprint"]
+  oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
+}
+```
+
+### Using existing OIDC provider and/or role
+
+```hcl
+module "github-oidc" {
+  source  = "terraform-module/github-oidc-provider/aws"
+  version = "~> 1"
+
+  # Use existing OIDC provider
+  create_oidc_provider = false
+  oidc_provider_arn    = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+  
+  # Use existing role
+  create_oidc_role     = false
+  oidc_role_arn        = "arn:aws:iam::123456789012:role/my-existing-github-role"
+  
+  # Optionally attach policies to the existing role
+  attach_policies_to_existing_role = true
+  oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"]
+}
+```
+
+### Updating repository list for existing role
+
+```hcl
+module "github-oidc" {
+  source  = "terraform-module/github-oidc-provider/aws"
+  version = "~> 1"
+
+  # Use existing OIDC provider
+  create_oidc_provider = false
+  oidc_provider_arn    = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+  
+  # Reference existing role but update its repository list
+  create_oidc_role           = false
+  oidc_role_arn              = "arn:aws:iam::123456789012:role/my-existing-github-role"
+  update_existing_role_policy = true
+  
+  # New repository list to update the role with
+  repositories = [
+    "my-org/repo1",
+    "my-org/repo2",
+    "another-org/some-repo:main"  # Only allow main branch
+  ]
 }
 ```
 
@@ -114,6 +189,11 @@ No modules.
 | <a name="input_create_oidc_provider"></a> [create\_oidc\_provider](#input\_create\_oidc\_provider) | Whether or not to create the associated oidc provider. If false, variable 'oidc\_provider\_arn' is required | `bool` | `true` | no |
 | <a name="input_oidc_provider_arn"></a> [oidc\_provider\_arn](#input\_oidc\_provider\_arn) | ARN of the OIDC provider to use. Required if 'create_oidc_provider' is false | `string` | `null` | no |
 | <a name="input_create_oidc_role"></a> [create\_oidc\_role](#input\_create\_oidc\_role) | Whether or not to create the OIDC attached role | `bool` | `true` | no |
+| <a name="input_oidc_role_arn"></a> [oidc\_role\_arn](#input\_oidc\_role\_arn) | ARN of the OIDC role to use. Required if 'create_oidc_role' is false | `string` | `null` | no |
+| <a name="input_attach_policies_to_existing_role"></a> [attach\_policies\_to\_existing\_role](#input\_attach\_policies\_to\_existing\_role) | Whether to attach the specified policies to an existing role when 'create_oidc_role' is false | `bool` | `false` | no |
+| <a name="input_update_existing_role_policy"></a> [update\_existing\_role\_policy](#input\_update\_existing\_role\_policy) | Whether to update the assume role policy of an existing role with the repository list from 'repositories' variable | `bool` | `false` | no |
+| <a name="input_iam_role_path"></a> [iam\_role\_path](#input\_iam\_role\_path) | Path for the IAM role | `string` | `/` | no |
+| <a name="input_iam_role_permissions_boundary"></a> [iam\_role\_permissions\_boundary](#input\_iam\_role\_permissions\_boundary) | ARN of the permissions boundary to use for the IAM role | `string` | `null` | no |
 | <a name="input_github_thumbprint"></a> [github\_thumbprint](#input\_github\_thumbprint) | GitHub OpenID TLS certificate thumbprint. | `string` | `"6938fd4d98bab03faadb97b34396831e3780aea1"` | no |
 | <a name="input_max_session_duration"></a> [max\_session\_duration](#input\_max\_session\_duration) | Maximum session duration in seconds. | `number` | `3600` | no |
 | <a name="input_oidc_role_attach_policies"></a> [oidc\_role\_attach\_policies](#input\_oidc\_role\_attach\_policies) | Attach policies to OIDC role. | `list(string)` | `[]` | no |
@@ -127,7 +207,8 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_oidc_provider_arn"></a> [oidc\_provider\_arn](#output\_oidc\_provider\_arn) | OIDC provider ARN |
-| <a name="output_oidc_role"></a> [oidc\_role](#output\_oidc\_role) | CICD GitHub role. |
+| <a name="output_oidc_role_arn"></a> [oidc\_role\_arn](#output\_oidc\_role\_arn) | CICD GitHub role ARN |
+| <a name="output_oidc_role_name"></a> [oidc\_role\_name](#output\_oidc\_role\_name) | CICD GitHub role name |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 

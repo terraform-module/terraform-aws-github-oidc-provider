@@ -16,6 +16,36 @@ variable "create_oidc_role" {
   default     = true
 }
 
+variable "oidc_role_arn" {
+  description = "ARN of the OIDC role to use. Required if 'create_oidc_role' is false"
+  type        = string
+  default     = null
+}
+
+variable "attach_policies_to_existing_role" {
+  description = "Whether to attach the specified policies to an existing role when 'create_oidc_role' is false"
+  type        = bool
+  default     = false
+}
+
+variable "update_existing_role_policy" {
+  description = "Whether to update the assume role policy of an existing role with the repository list from 'repositories' variable"
+  type        = bool
+  default     = false
+}
+
+variable "iam_role_path" {
+  description = "Path for the IAM role"
+  type        = string
+  default     = "/"
+}
+
+variable "iam_role_permissions_boundary" {
+  description = "ARN of the permissions boundary to use for the IAM role"
+  type        = string
+  default     = null
+}
+
 # Refer to the README for information on obtaining the thumbprint.
 # This is specified as a variable to allow it to be updated quickly if it is
 # unexpectedly changed by GitHub.

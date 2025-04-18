@@ -37,7 +37,7 @@ locals {
   role_arn = var.create_oidc_role ? aws_iam_role.this[0].arn : var.oidc_role_arn
   
   # Extract role name from ARN for policy attachments when using existing role
-  existing_role_name = var.create_oidc_role ? null : element(split("/", var.oidc_role_arn), length(split("/", var.oidc_role_arn)) - 1)
+  existing_role_name = (var.create_oidc_role || var.oidc_role_arn == null) ? null : element(split("/", var.oidc_role_arn), length(split("/", var.oidc_role_arn)) - 1)
   
   # For role name, use either the created role or the extracted name from ARN
   role_name = var.create_oidc_role ? aws_iam_role.this[0].name : local.existing_role_name

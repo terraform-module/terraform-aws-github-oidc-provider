@@ -8,6 +8,11 @@ variable "oidc_provider_arn" {
   description = "ARN of the OIDC provider to use. Required if 'create_oidc_provider' is false"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.oidc_provider_arn != null || var.create_oidc_provider
+    error_message = "When create_oidc_provider is false, oidc_provider_arn must be provided."
+  }
 }
 
 variable "create_oidc_role" {
@@ -20,6 +25,11 @@ variable "oidc_role_arn" {
   description = "ARN of the OIDC role to use. Required if 'create_oidc_role' is false"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.oidc_role_arn != null || var.create_oidc_role
+    error_message = "When create_oidc_role is false, oidc_role_arn must be provided."
+  }
 }
 
 variable "attach_policies_to_existing_role" {
@@ -54,6 +64,11 @@ variable "github_thumbprint" {
   description = "GitHub OpenID TLS certificate thumbprint."
   type        = string
   default     = "6938fd4d98bab03faadb97b34396831e3780aea1"
+
+  validation {
+    condition     = var.github_thumbprint != null
+    error_message = "The github_thumbprint value must not be null."
+  }
 }
 
 variable "repositories" {

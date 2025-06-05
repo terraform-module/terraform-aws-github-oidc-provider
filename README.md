@@ -1,6 +1,6 @@
 # AWS Github OIDC Provider Terraform Module
 
-This module allows you to create a GitHub OIDC provider and the associated IAM roles, that will help Github Actions to securely authenticate against the AWS API using an IAM role.
+This module allows you to create a GitHub OIDC provider (supporting both GitHub Actions and GitHub Audit Log streams) and associated IAM roles. This enables GitHub Actions, or external systems consuming GitHub audit logs via OIDC, to securely authenticate against the AWS API using an IAM role.
 
 We recommend using GitHub's OIDC provider to get short-lived credentials needed for your actions. Specifying role-to-assume without providing an aws-access-key-id or a web-identity-token-file will signal to the action that you wish to use the OIDC provider. The default session duration is 1 hour when using the OIDC provider to directly assume an IAM Role. The default session duration is 6 hours when using an IAM User to assume an IAM Role (by providing an aws-access-key-id, aws-secret-access-key, and a role-to-assume) . If you would like to adjust this you can pass a duration to role-duration-seconds, but the duration cannot exceed the maximum that was defined when the IAM Role was created. The default session name is GitHubActions, and you can modify it by specifying the desired name in role-session-name.
 
@@ -18,6 +18,7 @@ We recommend using GitHub's OIDC provider to get short-lived credentials needed 
 
 | Feature                                                                                                | Status |
 |--------------------------------------------------------------------------------------------------------|--------|
+| Support for GitHub Actions and Audit Log OIDC providers                                                | ✅     |
 | Create a role for all repositories in a specific Github organisation                                    | ✅     |
 | Create a role specific to a repository for a specific organisation                                       | ✅     |
 | Create a role specific to a branch in a repository                                                      | ✅     |
@@ -49,20 +50,68 @@ We recommend using GitHub's OIDC provider to get short-lived credentials needed 
 
 - [TFLint Rules](https://github.com/terraform-linters/tflint/tree/master/docs/rules)
 
-## Usage example
+## Provider Types and Conditions
 
-IMPORTANT: The master branch is used in source just as an example. In your code, do not pin to master because there may be breaking changes between releases. Instead pin to the release tag (e.g. ?ref=tags/x.y.z) of one of our [latest releases](https://github.com/terraform-module/terraform-aws-github-oidc-provider/releases).
+This module supports two types of GitHub OIDC providers, configurable via the `github_provider` input variable:
+
+*   `"actions"` (default): For integrating with GitHub Actions.
+    *   The OIDC provider URL will be `https://token.actions.githubusercontent.com`.
+    *   The thumbprint used will be taken from the `var.github_thumbprint` input variable, which defaults to the standard thumbprint for GitHub Actions.
+    *   The IAM role's trust policy will include:
+        *   A condition checking `token.actions.githubusercontent.com:aud` equals `sts.amazonaws.com`.
+        *   If `var.repositories` is provided (recommended for scoping permissions), an additional condition restricts `token.actions.githubusercontent.com:sub` (subject) using `StringLike` to patterns like `repo:your-org/your-repo:*`.
+
+*   `"audit-log"`: For integrating with GitHub Enterprise Audit Log streaming using OIDC.
+    *   The OIDC provider URL will be `https://oidc-configuration.audit-log.githubusercontent.com`.
+    *   The thumbprint used is specific to the audit log OIDC endpoint and is managed internally by the module.
+    *   The `var.enterprise_name` input variable **must** be set to your GitHub Enterprise name (case-sensitive).
+    *   The IAM role's trust policy will include:
+        *   A condition checking `oidc-configuration.audit-log.githubusercontent.com:aud` equals `sts.amazonaws.com`.
+        *   If `var.enterprise_name` is provided, an additional condition restricts `oidc-configuration.audit-log.githubusercontent.com:sub` (subject) using `StringEquals` to `https://github.com/YOUR_ENTERPRISE_NAME` (where `YOUR_ENTERPRISE_NAME` is from `var.enterprise_name`).
+
+### Default Usage (GitHub Actions)
+
+IMPORTANT: The master branch is used in `source` just as an example in older READMEs. In your code, do not pin to master because there may be breaking changes between releases. Instead pin to the release tag (e.g. `?ref=tags/x.y.z` or `version = "x.y.z"`) of one of our [latest releases](https://github.com/terraform-module/terraform-aws-github-oidc-provider/releases).
 
 ```hcl
-module "github-oidc" {
+module "github_oidc_actions" {
   source  = "terraform-module/github-oidc-provider/aws"
-  version = "~> 1"
+  version = "~> 1.0" // TODO: Replace with the latest appropriate version tag
 
   create_oidc_provider = true
   create_oidc_role     = true
 
-  repositories              = ["terraform-module/module-blueprint"]
-  oidc_role_attach_policies = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"]
+  // Example: Allow any repository in 'my-org' or a specific branch in 'another-repo'
+  repositories = [
+    "my-org/*",
+    "my-org/another-repo:ref:refs/heads/main"
+  ]
+  oidc_role_attach_policies = [
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  ]
+}
+```
+
+### Audit Log Provider Usage
+
+To use the GitHub Audit Log OIDC provider, you must specify `github_provider = "audit-log"` and provide your `enterprise_name`.
+
+```hcl
+module "github_oidc_audit_log" {
+  source  = "terraform-module/github-oidc-provider/aws"
+  version = "~> 1.0" // TODO: Replace with the latest appropriate version tag
+
+  create_oidc_provider = true
+  create_oidc_role     = true
+
+  github_provider = "audit-log"
+  enterprise_name = "MyGitHubEnterprise" // Replace with your actual enterprise name (case-sensitive)
+
+  // Policies attached to the role that will be assumed by the audit log consumer
+  oidc_role_attach_policies = [
+    "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess" // Example policy
+  ]
+  // Note: The 'repositories' variable is not used when github_provider is 'audit-log'.
 }
 ```
 
@@ -75,6 +124,8 @@ See `examples` directory for working examples to reference
 ## Assumptions
 
 ## Available features
+
+> **Note:** The Inputs and Outputs tables below are auto-generated. After making changes to variables, please run `terraform-docs .` or your pre-commit hooks to ensure this section is up-to-date with new variables like `github_provider` and `enterprise_name`.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 # AWS Github OIDC Provider Terraform Module
@@ -121,6 +172,8 @@ No modules.
 | <a name="input_role_description"></a> [role\_description](#input\_role\_description) | (Optional) Description of the role. | `string` | `"Role assumed by the GitHub OIDC provider."` | no |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | (Optional, Forces new resource) Friendly name of the role. | `string` | `"github-oidc-provider-aws"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to all resources | `map(string)` | `{}` | no |
+| <a name="input_github_provider"></a> [github\_provider](#input\_github\_provider) | Type of GitHub OIDC provider to create. | `string` | `"actions"` | no |
+| <a name="input_enterprise_name"></a> [enterprise\_name](#input\_enterprise\_name) | GitHub Enterprise name for audit log provider. | `string` | `null` | no |
 
 ## Outputs
 

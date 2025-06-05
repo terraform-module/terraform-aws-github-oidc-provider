@@ -109,7 +109,7 @@ module "github_oidc_audit_log" {
 
   // Policies attached to the role that will be assumed by the audit log consumer
   oidc_role_attach_policies = [
-    "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess" // Example policy
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess" // Example policy with s3:PutObject permission
   ]
   // Note: The 'repositories' variable is not used when github_provider is 'audit-log'.
 }

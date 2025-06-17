@@ -23,7 +23,7 @@ variable "create_oidc_role" {
 variable "github_thumbprint" {
   description = "GitHub OpenID TLS certificate thumbprint."
   type        = string
-  default     = "6938fd4d98bab03faadb97b34396831e3780aea1"
+  default     = null
 }
 
 variable "repositories" {
@@ -75,4 +75,20 @@ variable "role_description" {
   description = "(Optional) Description of the role."
   type        = string
   default     = "Role assumed by the GitHub OIDC provider."
+}
+
+variable "github_provider" {
+  description = "The GitHub OIDC provider type. Can be 'actions' or 'audit-log'."
+  type        = string
+  default     = "actions"
+  validation {
+    condition     = contains(["actions", "audit-log"], var.github_provider)
+    error_message = "Valid values for github_provider are 'actions' or 'audit-log'."
+  }
+}
+
+variable "enterprise_name" {
+  description = "The name of the enterprise to use when github_provider is 'audit-log'. The name is case-sensitive."
+  type        = string
+  default     = null
 }

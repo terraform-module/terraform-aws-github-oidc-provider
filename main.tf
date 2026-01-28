@@ -12,6 +12,7 @@ resource "aws_iam_openid_connect_provider" "this" {
   ]
   thumbprint_list = [var.github_thumbprint]
   url             = "https://token.actions.githubusercontent.com"
+  tags            = var.tags
 }
 
 resource "aws_iam_role" "this" {

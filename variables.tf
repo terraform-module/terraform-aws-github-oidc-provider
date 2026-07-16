@@ -27,18 +27,28 @@ variable "github_thumbprint" {
 }
 
 variable "repositories" {
-  description = "List of GitHub organization/repository names authorized to assume the role."
+  description = <<-EOT
+    List of GitHub organization/repository names authorized to assume the role.
+    Both the classic name-based format (`organization/repository`) and the
+    immutable subject format that GitHub issues for repositories created or
+    transferred after 2026-07-15 (`organization@owner-id/repository@repo-id`)
+    are supported.
+    See https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims.
+  EOT
   type        = list(string)
   default     = []
 
   validation {
-    # Ensures each element of github_repositories list matches the
-    # organization/repository format used by GitHub.
+    # Ensures each element of the repositories list matches either the classic
+    # `organization/repository` format or the immutable-subject format
+    # `organization@owner-id/repository@repo-id` that GitHub uses for the
+    # `sub` claim of repositories created/transferred after 2026-07-15.
+    # An optional trailing context (e.g. `:ref:refs/heads/main`, `:*`) is allowed.
     condition = length([
       for repo in var.repositories : 1
-      if length(regexall("^[A-Za-z0-9_.-]+?/([A-Za-z0-9_.:/-]+|\\*)$", repo)) > 0
+      if length(regexall("^[A-Za-z0-9_.-]+(@[0-9]+)?/([A-Za-z0-9_.:/@-]+|\\*)$", repo)) > 0
     ]) == length(var.repositories)
-    error_message = "Repositories must be specified in the organization/repository format."
+    error_message = "Repositories must be specified in the organization/repository or immutable organization@owner-id/repository@repo-id format."
   }
 }
 

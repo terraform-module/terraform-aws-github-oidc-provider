@@ -66,6 +66,37 @@ module "github-oidc" {
 }
 ```
 
+### Immutable subject claims
+
+GitHub issues OIDC tokens whose `sub` claim uses an immutable format that embeds
+the numeric owner and repository IDs for repositories created or transferred
+after 2026-07-15 (`repo:OWNER@OWNER-ID/REPO@REPO-ID:...`). This module accepts
+that format in `repositories` alongside the classic name-based format, so you
+can mix both:
+
+```hcl
+module "github-oidc" {
+  source  = "terraform-module/github-oidc-provider/aws"
+  version = "~> 1"
+
+  create_oidc_provider = true
+  create_oidc_role     = true
+
+  repositories = [
+    # Classic name-based subject
+    "terraform-module/module-blueprint",
+    # Immutable subject (owner id 123456, repo id 789012)
+    "terraform-module@123456/module-blueprint@789012",
+  ]
+}
+```
+
+You can retrieve the immutable prefix for a repository from the
+`sub_claim_prefix` field of the
+`GET /repos/{owner}/{repo}/actions/oidc/customization/sub` REST API endpoint.
+See [Immutable subject claims](https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims)
+for more information.
+
 ## Examples
 
 See `examples` directory for working examples to reference
@@ -117,7 +148,7 @@ No modules.
 | <a name="input_github_thumbprint"></a> [github\_thumbprint](#input\_github\_thumbprint) | GitHub OpenID TLS certificate thumbprint. | `string` | `"6938fd4d98bab03faadb97b34396831e3780aea1"` | no |
 | <a name="input_max_session_duration"></a> [max\_session\_duration](#input\_max\_session\_duration) | Maximum session duration in seconds. | `number` | `3600` | no |
 | <a name="input_oidc_role_attach_policies"></a> [oidc\_role\_attach\_policies](#input\_oidc\_role\_attach\_policies) | Attach policies to OIDC role. | `list(string)` | `[]` | no |
-| <a name="input_repositories"></a> [repositories](#input\_repositories) | List of GitHub organization/repository names authorized to assume the role. | `list(string)` | `[]` | no |
+| <a name="input_repositories"></a> [repositories](#input\_repositories) | List of GitHub organization/repository names authorized to assume the role. Both the classic `organization/repository` format and the immutable subject format `organization@owner-id/repository@repo-id` (used by GitHub for repositories created/transferred after 2026-07-15) are supported. | `list(string)` | `[]` | no |
 | <a name="input_role_description"></a> [role\_description](#input\_role\_description) | (Optional) Description of the role. | `string` | `"Role assumed by the GitHub OIDC provider."` | no |
 | <a name="input_role_name"></a> [role\_name](#input\_role\_name) | (Optional, Forces new resource) Friendly name of the role. | `string` | `"github-oidc-provider-aws"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A mapping of tags to assign to all resources | `map(string)` | `{}` | no |

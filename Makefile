@@ -4,7 +4,7 @@ SHELL = /bin/bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
-.PHONY: pre-commit changelog release
+.PHONY: pre-commit changelog release tflint
 
 # -include $(shell curl -sSL -o .build-harness "https://git.io/build-harness"; echo .build-harness)
 
@@ -19,3 +19,7 @@ hooks: ## Commit hooks setup
 
 validate: ## Validate with pre-commit hooks
 	@pre-commit run --all-files
+
+tflint: ## Init and run tflint
+	@tflint --init --config .tflint.hcl
+	@tflint -f compact --config .tflint.hcl

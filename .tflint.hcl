@@ -42,6 +42,13 @@ rule "terraform_naming_convention" {
   format  = "snake_case"
 }
 
+# Intentionally disabled: this module leaves the aws provider version
+# unconstrained by design. See rule docs:
+# https://github.com/terraform-linters/tflint-ruleset-terraform/blob/main/docs/rules/terraform_required_providers.md
+rule "terraform_required_providers" {
+  enabled = false
+}
+
 rule "terraform_standard_module_structure" {
   enabled = true
 }

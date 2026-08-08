@@ -1,10 +1,3 @@
-/**
- * # AWS Github OIDC Provider Terraform Module
- *
- * ## Purpose
- * This module allows you to create a Github OIDC provider for your AWS account, that will help Github Actions to securely authenticate against the AWS API using an IAM role
- *
-*/
 resource "aws_iam_openid_connect_provider" "this" {
   count = var.create_oidc_provider ? 1 : 0
   client_id_list = [
@@ -20,7 +13,7 @@ resource "aws_iam_role" "this" {
   name                 = var.role_name
   description          = var.role_description
   max_session_duration = var.max_session_duration
-  assume_role_policy   = join("", data.aws_iam_policy_document.this[0].*.json)
+  assume_role_policy   = data.aws_iam_policy_document.this[0].json
   tags                 = var.tags
   # path                  = var.iam_role_path
   # permissions_boundary  = var.iam_role_permissions_boundary
@@ -31,7 +24,7 @@ resource "aws_iam_role_policy_attachment" "attach" {
   count = var.create_oidc_role ? length(var.oidc_role_attach_policies) : 0
 
   policy_arn = var.oidc_role_attach_policies[count.index]
-  role       = join("", aws_iam_role.this.*.name)
+  role       = aws_iam_role.this[0].name
 
   depends_on = [aws_iam_role.this]
 }

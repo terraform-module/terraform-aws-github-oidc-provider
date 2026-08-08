@@ -1,10 +1,3 @@
-/**
- * # AWS Github OIDC Provider Terraform Module
- *
- * ## Purpose
- * This module allows you to create a Github OIDC provider for your AWS account, that will help Github Actions to securely authenticate against the AWS API using an IAM role
- *
-*/
 resource "aws_iam_openid_connect_provider" "this" {
   count = var.create_oidc_provider ? 1 : 0
   client_id_list = [
